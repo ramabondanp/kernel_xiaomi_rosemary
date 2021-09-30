@@ -84,8 +84,8 @@ tg_post_build() {
 
 repack() {
   cd "$KERNEL_DIR/ramdisk" || exit 1
-  rm *.gz-dtb
-  cp "$OUTDIR"/arch/arm64/boot/Image.gz-dtb .
+  rm Image.gz
+  cp "$OUTDIR"/arch/arm64/boot/Image.gz .
   bash bootimg.sh
   mv *.img "$KNAME"-"${DATE}".img
   cd - || exit
@@ -137,7 +137,7 @@ export DEFCONFIG=$CONFIG"_defconfig"
 export TZ="Asia/Jakarta"
 export KERNEL_DIR=$(pwd)
 export KNAME="Genom-R-$CONFIG-BETA"
-export IMAGE="${OUTDIR}/arch/arm64/boot/Image.gz-dtb"
+export IMAGE="${OUTDIR}/arch/arm64/boot/Image.gz"
 export DATE=$(date "+%Y%m%d-%H%M")
 export BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 export PATH="${OUTDIR}/clang-llvm/bin:${OUTDIR}/gcc64-aosp/bin:${OUTDIR}/gcc32-aosp/bin:${PATH}"

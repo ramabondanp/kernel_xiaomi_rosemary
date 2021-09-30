@@ -14,7 +14,7 @@ echo "ramdiskdir = $RAMDISKDIR"
 
 echo "Making new boot image"
 mkbootimg \
-    --kernel $RAMDISKDIR/Image.gz-dtb \
+    --kernel $RAMDISKDIR/Image.gz \
     --ramdisk $RAMDISKDIR/ramdisk.cpio.gz \
     --cmdline 'bootopt=64S3,32N2,64N2' \
     --base           0x40078000 \
