@@ -8,10 +8,11 @@
 
 Help()
 {
-  echo "Usage: [--help|-h|-?] [--clone|-c] [--lto]"
+  echo "Usage: [--help|-h|-?] [--clone|-c] [--lto] [--img]"
   echo "$0 <defconfig> <token> [Other Args]"
   echo -e "\t--clone: Clone compiler"
   echo -e "\t--lto: Enable Clang LTO"
+  echo -e "\t--img: Build boot.img instead of zip flasher"
   echo -e "\t--help: To show this info"
 }
 
@@ -29,6 +30,10 @@ case $key in
   ;;
   --lto)
   LTO=true
+  shift
+  ;;
+  --img)
+  IMG=true
   shift
   ;;
   --help|-h|-?)
@@ -57,6 +62,7 @@ echo
 echo "Using defconfig: ""$CONFIG""_defconfig"
 echo "Clone dependencies: $([[ ! -z "$CLONE" ]] && echo "true" || echo "false")"
 echo "Enable LTO Clang: $([[ ! -z "$LTO" ]] && echo "true" || echo "false")"
+echo "Build boot.img instead of zip: $([[ ! -z "$IMG" ]] && echo "true" || echo "false")"
 echo
 read -p "Are you sure? " -n 1 -r
 ! [[ $REPLY =~ ^[Yy]$ ]] && exit
@@ -91,9 +97,18 @@ repack() {
   cd - || exit
 }
 
+zipping() {
+  cd "$OUTDIR"/AnyKernel || exit 1
+  rm -- *.zip *.gz
+  cp "$OUTDIR"/arch/arm64/boot/Image.gz .
+  zip -r9 "[$ZDATE][$CONFIG]$KERVER-$ZIPNAME-$HASH_HEAD.zip" -- *
+  cd - || exit
+}
+
 ##----------------------------------------------------------------##
 
 build_kernel() {
+  find "$OUTDIR" -name *.gz *.gz-dtb -delete
   [[ $LTO == true ]] && echo "CONFIG_LTO_CLANG=y" >> arch/arm64/configs/"$DEFCONFIG"
   echo "-Genom-R-$CONFIG" > localversion
   make O="$OUTDIR" ARCH=arm64 "$DEFCONFIG"
@@ -136,6 +151,8 @@ BOT_BUILD_URL="https://api.telegram.org/bot$TOKEN/sendDocument"
 export DEFCONFIG=$CONFIG"_defconfig"
 export TZ="Asia/Jakarta"
 export KERNEL_DIR=$(pwd)
+export ZIPNAME="Genom-R-BETA"
+export ZDATE=$(date "+%m%d")
 export KNAME="Genom-R-$CONFIG-BETA"
 export IMAGE="${OUTDIR}/arch/arm64/boot/Image.gz"
 export DATE=$(date "+%Y%m%d-%H%M")
@@ -144,6 +161,7 @@ export PATH="${OUTDIR}/clang-llvm/bin:${OUTDIR}/gcc64-aosp/bin:${OUTDIR}/gcc32-a
 export KBUILD_COMPILER_STRING="$(${OUTDIR}/clang-llvm/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')"
 export ARCH=arm64
 export KBUILD_BUILD_USER=rama982
+export HASH_HEAD=$(git rev-parse --short HEAD)
 export COMMIT_HEAD=$(git log --oneline -1)
 export PROCS=$(nproc --all)
 export DISTRO=$(cat /etc/issue)
@@ -169,9 +187,15 @@ DIFF=$((BUILD_END - BUILD_START))
 
 if [[ -f $IMAGE ]]
 then
-  repack
-  BOOTIMG=$(ls "$KERNEL_DIR"/ramdisk/*.img)
-  tg_post_build "$BOOTIMG" "
+  if [[ $IMG == true ]]
+  then
+    repack
+    FILE=$(ls "$KERNEL_DIR"/ramdisk/*.img)
+  else
+    zipping
+    FILE=$(ls "$OUTDIR"/AnyKernel/*.zip)
+fi
+  tg_post_build "$FILE" "
 <b>Build took : </b>$((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)
 <b>Kernel Version : </b>$KERVER
 <b>Compiler: </b>$(grep LINUX_COMPILER ${OUTDIR}/include/generated/compile.h  |  sed -e 's/.*LINUX_COMPILER "//' -e 's/"$//')
