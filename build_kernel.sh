@@ -203,6 +203,7 @@ fi
 "
 else
   tg_post_msg "<b>Build took : </b>$((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s) but error"
+  exit 1
 fi
 
 # reset git
