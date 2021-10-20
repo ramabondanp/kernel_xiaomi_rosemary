@@ -130,7 +130,7 @@ if [[ $CLONE == true ]]
 then
   echo "Cloning dependencies"
   git clone https://github.com/rama982/clang --depth=1 "$OUTDIR"/clang-llvm
-  git clone https://github.com/rama982/AnyKernel3 --depth=1 "$OUTDIR"/AnyKernel
+  git clone https://github.com/rama982/AnyKernel3 -b rosemary "$OUTDIR"/AnyKernel
 fi
 
 #telegram env
