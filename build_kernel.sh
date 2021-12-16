@@ -110,7 +110,7 @@ zipping() {
 build_kernel() {
   find "$OUTDIR" -name *.gz *.gz-dtb -delete
   [[ $LTO == true ]] && echo "CONFIG_LTO_CLANG=y" >> arch/arm64/configs/"$DEFCONFIG"
-  echo "-Genom-R-$CONFIG" > localversion
+  echo "-Genom-R$NAMELTO-$CONFIG" > localversion
   make O="$OUTDIR" ARCH=arm64 "$DEFCONFIG"
   make -j"$PROCS" O="$OUTDIR" \
                   ARCH=arm64 \
@@ -142,9 +142,10 @@ BOT_BUILD_URL="https://api.telegram.org/bot$TOKEN/sendDocument"
 export DEFCONFIG=$CONFIG"_defconfig"
 export TZ="Asia/Jakarta"
 export KERNEL_DIR=$(pwd)
-export ZIPNAME="Genom-R-BETA"
+[[ $LTO == true ]] && export NAMELTO="-LTO"
+export ZIPNAME="Genom-R$NAMELTO-BETA"
 export ZDATE=$(date "+%m%d")
-export KNAME="Genom-R-$CONFIG-BETA"
+export KNAME="Genom-R$NAMELTO-$CONFIG-BETA"
 export IMAGE="${OUTDIR}/arch/arm64/boot/Image.gz"
 export DATE=$(date "+%Y%m%d-%H%M")
 export BRANCH="$(git rev-parse --abbrev-ref HEAD)"
