@@ -110,6 +110,7 @@ zipping() {
 build_kernel() {
   find "$OUTDIR" -name *.gz *.gz-dtb -delete
   [[ $LTO == true ]] && echo "CONFIG_LTO_CLANG=y" >> arch/arm64/configs/"$DEFCONFIG"
+  [[ $LTO == true ]] && echo "CONFIG_THINLTO=n" >> arch/arm64/configs/"$DEFCONFIG"
   echo "-Genom-R$NAMELTO-$CONFIG" > localversion
   make O="$OUTDIR" ARCH=arm64 "$DEFCONFIG"
   make -j"$PROCS" O="$OUTDIR" \
