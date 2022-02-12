@@ -120,7 +120,9 @@ build_kernel() {
                   CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
                   LD=ld.lld \
                   NM=llvm-nm \
-                  OBJCOPY=llvm-objcopy
+                  AR=llvm-ar \
+                  OBJCOPY=llvm-objcopy \
+                  OBJDUMP=llvm-objdump
 }
 
 ##----------------------------------------------------------------##
